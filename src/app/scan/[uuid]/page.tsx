@@ -26,7 +26,7 @@ export default async function ScanPage({
 }) {
   const { uuid } = await params
   const family = await getCurrentFamily()
-  if (!family) redirect(`/register?next=/scan/${uuid}`)
+  if (!family) redirect('/')
 
   const claim = await claimTreasure(uuid, family.id)
 
