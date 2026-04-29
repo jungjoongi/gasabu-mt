@@ -7,6 +7,7 @@ import { DiaryStack } from '@/components/DiaryStack'
 import { ProgressLeaderboard } from '@/components/ProgressLeaderboard'
 import { SpecialHintCard } from '@/components/SpecialHintCard'
 import { PushedHintsCard } from '@/components/PushedHintsCard'
+import { HintBroadcastModal } from '@/components/HintBroadcastModal'
 import { AnswerModal } from '@/components/AnswerModal'
 import { ScanCTA } from '@/components/ScanCTA'
 
@@ -66,6 +67,8 @@ export default function Play() {
         onClose={() => setOpen(false)}
         onWin={() => router.push('/result')}
       />
+
+      <HintBroadcastModal hints={family.pushedHints} />
     </main>
   )
 }
