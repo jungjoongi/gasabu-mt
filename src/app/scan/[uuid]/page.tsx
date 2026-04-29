@@ -6,6 +6,7 @@ import { claimTreasure } from '@/lib/treasure'
 import { saveFamily, getFamily } from '@/lib/family'
 import { fillNextRandom } from '@/lib/initials'
 import { SPECIAL_HINTS, DIARY_PAGES } from '@/lib/content'
+import { DiaryAutoPlayCard } from '@/components/DiaryAutoPlayCard'
 
 interface BannerSpec {
   tone: 'ok' | 'warn' | 'err'
@@ -66,21 +67,12 @@ export default async function ScanPage({
     }
     await saveFamily(family)
     updatedFamily = family
-    const idx = count - 1
-    const page = DIARY_PAGES[Math.min(idx, 6)]
+    const idx = Math.min(count - 1, 6)
+    const page = DIARY_PAGES[idx]
     banner = {
       tone: 'ok',
       title: `보물을 찾았습니다! (${count}/7+)`,
-      body: (
-        <article className="bg-amber-50 text-amber-950 rounded-xl p-4 font-handwriting mt-3">
-          <h4 className="font-bold mb-1">
-            {idx + 1}. {page.title}
-          </h4>
-          <p className="text-sm leading-relaxed whitespace-pre-line">
-            {page.body}
-          </p>
-        </article>
-      ),
+      body: <DiaryAutoPlayCard index={idx} title={page.title} body={page.body} />,
     }
   }
 
