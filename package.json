@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "seed": "tsx scripts/seed-treasures.ts",
+    "seed": "node --env-file=.env.local --import tsx scripts/seed-treasures.ts",
     "qr": "tsx scripts/generate-qr.ts"
   },
   "dependencies": {

@@ -1,8 +1,14 @@
 import { Redis } from '@upstash/redis'
 
-// 테스트 환경에서는 mock의 fromEnv()가 fakeRedis 를 반환
-// prod/dev 에서는 UPSTASH_REDIS_REST_URL/TOKEN 환경변수 사용
-const redis = Redis.fromEnv()
+// 환경변수 이름 호환:
+// - 신규: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
+// - Vercel Marketplace 통합 시 legacy KV_REST_API_URL / KV_REST_API_TOKEN 도 주입됨
+// 테스트 환경에서는 @upstash/redis 모듈 자체가 모킹되어 두 변수 모두 빌 수 있음
+const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL ?? ''
+const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
+const redis = url && token
+  ? new Redis({ url, token })
+  : Redis.fromEnv()
 
 export async function getJSON<T>(key: string): Promise<T | null> {
   const v = await redis.get<T>(key)
