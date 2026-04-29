@@ -1,20 +1,25 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CLIMAX_SCRIPT } from '@/lib/content'
 import type { GameState } from '@/types'
-import { ClimaxExperience } from '@/components/ClimaxExperience'
+import { ClimaxCrawl } from '@/components/ClimaxExperience'
 
 const POLL_MS = Number(process.env.NEXT_PUBLIC_POLL_INTERVAL_MS ?? 3000)
 
 /**
- * 게임 종료(클라이맥스) 화면.
+ * 게임 종료 화면.
  *
- * 진입 시점에 game.status === 'finished' 가 되면 ClimaxExperience 가 마운트되어
- * 풀스크린 크롤 + climax.mp3 자동 재생 → 종료 후 ending.mp3 BGM 자동 이어 재생.
+ * phase 흐름:
+ *   waiting → 게임 미종료. 폴링.
+ *   crawl   → 풀스크린 크롤 + climax.mp3 1회 자동 재생.
+ *   summary → 결과 정리 + ending.mp3 BGM 1회 재생 (loop 없음).
  */
 export default function ResultPage() {
   const [game, setGame] = useState<GameState | null>(null)
+  const [phase, setPhase] = useState<'waiting' | 'crawl' | 'summary'>('waiting')
+  const endingRef = useRef<HTMLAudioElement>(null)
 
+  // 게임 상태 폴링 + finished 감지 시 즉시 crawl phase 전환
   useEffect(() => {
     let alive = true
     async function tick() {
@@ -22,7 +27,12 @@ export default function ResultPage() {
         const r = await fetch('/api/game/state', { cache: 'no-store' })
         const json = await r.json()
         if (!alive) return
-        if (json.ok) setGame(json.data as GameState)
+        if (!json.ok) return
+        const next = json.data as GameState
+        setGame(next)
+        if (next.status === 'finished') {
+          setPhase((p) => (p === 'waiting' ? 'crawl' : p))
+        }
       } catch {
         /* noop */
       }
@@ -47,7 +57,19 @@ export default function ResultPage() {
 
   return (
     <>
-      <ClimaxExperience winnerNickname={nickname} />
+      {phase === 'crawl' && (
+        <ClimaxCrawl
+          winnerNickname={nickname}
+          onCrawlEnd={() => {
+            setPhase('summary')
+            // BGM 시작 (한 번만 재생, loop 없음)
+            requestAnimationFrame(() => {
+              endingRef.current?.play().catch(() => {})
+            })
+          }}
+        />
+      )}
+
       <main className="min-h-screen p-6 flex flex-col items-center justify-center gap-6 text-center">
         <div className="text-6xl">🎉</div>
         <h1 className="text-3xl font-bold">게임 종료!</h1>
@@ -68,7 +90,22 @@ export default function ResultPage() {
             {CLIMAX_SCRIPT.replace('{nickname}', nickname)}
           </p>
         </details>
+        {phase === 'summary' && (
+          <button
+            onClick={() => {
+              const a = endingRef.current
+              if (!a) return
+              if (a.paused) a.play().catch(() => {})
+              else a.pause()
+            }}
+            className="px-4 py-2 bg-amber-100 text-amber-950 rounded-xl text-sm font-bold"
+          >
+            🎵 BGM 재생/정지
+          </button>
+        )}
       </main>
+
+      <audio ref={endingRef} src="/audio/ending.mp3" preload="auto" />
     </>
   )
 }
