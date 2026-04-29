@@ -76,7 +76,7 @@ export default function ResultPage() {
           className="px-8 py-5 bg-amber-100 text-amber-950 rounded-2xl font-bold text-xl shadow-2xl active:scale-95 transition flex items-center gap-3"
         >
           <span className="text-2xl">🎬</span>
-          <span>시네마틱 시청 시작</span>
+          <span>결과 보러 가기</span>
         </button>
         <p className="text-amber-200/60 text-xs">
           탭하여 음성 낭독과 함께 결말을 확인하세요
@@ -90,11 +90,14 @@ export default function ResultPage() {
       {phase === 'crawl' && (
         <ClimaxCrawl
           winnerNickname={nickname}
-          onCrawlEnd={() => {
+          onCrawlEnd={(reason) => {
             setPhase('summary')
-            requestAnimationFrame(() => {
-              endingRef.current?.play().catch(() => {})
-            })
+            // 자연 종료 시에만 BGM 1회 재생. 건너뛰기는 무음 전환.
+            if (reason === 'natural') {
+              requestAnimationFrame(() => {
+                endingRef.current?.play().catch(() => {})
+              })
+            }
           }}
         />
       )}
