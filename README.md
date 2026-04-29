@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 잃어버린 13지파의 후예
 
-## Getting Started
+교회 가족 수련회용 모바일 보물찾기 게임. Next.js 16 + Upstash Redis (via Vercel Marketplace).
 
-First, run the development server:
+## 빠른 시작 (개발)
 
 ```bash
+# Vercel 프로젝트 연결 후 환경변수 끌어오기
+npx vercel link
+npx vercel env pull .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 행사 전 준비
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. KV에 보물 60개 시드
+NEXT_PUBLIC_BASE_URL=https://your-domain.vercel.app npm run seed -- 60
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. QR 인쇄용 PNG 생성
+npm run qr
 
-## Learn More
+# 3. out/qr/treasure-NN.png 60장을 50x50mm 스티커로 인쇄
 
-To learn more about Next.js, take a look at the following resources:
+# 4. mp3 10개를 public/audio/ 에 복사 (생성 가이드: public/audio/README.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 5. Vercel 배포
+npx vercel --prod
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 6. 행사 시작 직전 /admin → "게임 시작"
+```
 
-## Deploy on Vercel
+## 행사 후 정리
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`/admin` → "전체 리셋" → KV 초기화 (다음 행사용)
