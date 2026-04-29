@@ -17,7 +17,7 @@ export default function ResultPage() {
   const [game, setGame] = useState<GameState | null>(null)
   const climaxRef = useRef<HTMLAudioElement>(null)
   const endingRef = useRef<HTMLAudioElement>(null)
-  const [phase, setPhase] = useState<'idle' | 'climax' | 'ending'>('idle')
+  const climaxStartedRef = useRef(false)
 
   useEffect(() => {
     let alive = true
@@ -26,9 +26,16 @@ export default function ResultPage() {
         const r = await fetch('/api/game/state', { cache: 'no-store' })
         const json = await r.json()
         if (!alive) return
-        if (json.ok) setGame(json.data as GameState)
+        if (json.ok) {
+          const next = json.data as GameState
+          setGame(next)
+          if (next.status === 'finished' && !climaxStartedRef.current) {
+            climaxStartedRef.current = true
+            climaxRef.current?.play().catch(() => {})
+          }
+        }
       } catch {
-        // 네트워크 일시 오류는 무시 — 다음 틱에 재시도
+        // 네트워크 일시 오류는 무시
       }
     }
     tick()
@@ -38,13 +45,6 @@ export default function ResultPage() {
       clearInterval(id)
     }
   }, [])
-
-  useEffect(() => {
-    if (game?.status === 'finished' && phase === 'idle') {
-      climaxRef.current?.play().catch(() => {})
-      setPhase('climax')
-    }
-  }, [game?.status, phase])
 
   if (!game || game.status !== 'finished') {
     return (
@@ -84,7 +84,6 @@ export default function ResultPage() {
         src="/audio/climax.mp3"
         onEnded={() => {
           endingRef.current?.play().catch(() => {})
-          setPhase('ending')
         }}
       />
       <audio ref={endingRef} src="/audio/ending.mp3" loop />
