@@ -1,6 +1,26 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { Html5Qrcode } from 'html5-qrcode'
+import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'
+
+// SCANNING / PAUSED 상태일 때만 stop 호출 가능 — 그 외 호출 시 라이브러리가 throw.
+async function safeStop(inst: Html5Qrcode): Promise<void> {
+  try {
+    const state = inst.getState()
+    if (
+      state === Html5QrcodeScannerState.SCANNING ||
+      state === Html5QrcodeScannerState.PAUSED
+    ) {
+      await inst.stop()
+    }
+  } catch {
+    // 어떤 경우에도 cleanup 은 silent
+  }
+  try {
+    inst.clear()
+  } catch {
+    /* noop */
+  }
+}
 
 const SCANNER_ID = 'qr-scanner-region'
 
@@ -46,13 +66,9 @@ export function QrScannerModal({
           if (cancelled) return
           const target = extractScanTarget(decodedText)
           if (target) {
-            html5
-              .stop()
-              .catch(() => {})
-              .finally(() => {
-                if (!cancelled) onResult(target)
-              })
-          } else if (!cancelled) {
+            cancelled = true
+            void safeStop(html5).then(() => onResult(target))
+          } else {
             setError('이 게임의 QR이 아닙니다')
           }
         },
@@ -70,9 +86,7 @@ export function QrScannerModal({
       cancelled = true
       const inst = scannerRef.current
       scannerRef.current = null
-      if (inst) {
-        inst.stop().catch(() => {}).finally(() => inst.clear())
-      }
+      if (inst) void safeStop(inst)
     }
   }, [open, onResult])
 
