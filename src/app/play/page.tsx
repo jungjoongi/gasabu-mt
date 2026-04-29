@@ -6,6 +6,7 @@ import { InitialsBoard } from '@/components/InitialsBoard'
 import { DiaryStack } from '@/components/DiaryStack'
 import { ProgressLeaderboard } from '@/components/ProgressLeaderboard'
 import { SpecialHintCard } from '@/components/SpecialHintCard'
+import { PushedHintsCard } from '@/components/PushedHintsCard'
 import { AnswerModal } from '@/components/AnswerModal'
 import { ScanCTA } from '@/components/ScanCTA'
 
@@ -40,6 +41,8 @@ export default function Play() {
       <DiaryStack pagesRead={family.diaryPagesRead} />
 
       <SpecialHintCard seen={family.specialHintsSeen} />
+
+      <PushedHintsCard hints={family.pushedHints} />
 
       <ProgressLeaderboard />
 
