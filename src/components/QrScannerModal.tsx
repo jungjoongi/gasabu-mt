@@ -100,8 +100,19 @@ export function QrScannerModal({
         </h3>
         <div
           id={SCANNER_ID}
-          className="w-full aspect-square bg-stone-900 rounded-2xl overflow-hidden"
+          className="qr-scanner-region w-full aspect-square bg-stone-900 rounded-2xl overflow-hidden relative"
         />
+        <style jsx global>{`
+          .qr-scanner-region video,
+          .qr-scanner-region canvas,
+          .qr-scanner-region img {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+          }
+        `}</style>
         {starting && (
           <p className="text-amber-200/70 text-center text-sm">
             카메라를 여는 중...
