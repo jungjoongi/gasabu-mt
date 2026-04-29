@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { checkAdminPassword } from '@/lib/admin'
-import { getFamilyByNickname, saveFamily } from '@/lib/family'
+import { listAllFamilies, saveFamily } from '@/lib/family'
 
-const Body = z.object({ nickname: z.string(), hint: z.string() })
+// 운영자가 모든 가족에게 한 번에 힌트를 방송한다.
+// 등록된 가족이 없으면 0명에게 전달됐다고 응답.
+const Body = z.object({ hint: z.string().min(1).max(200) })
 
 export async function POST(req: Request) {
   if (!checkAdminPassword(req.headers.get('x-admin-password'))) {
     return NextResponse.json({ ok: false, error: '권한 없음' }, { status: 401 })
   }
   const parsed = Body.safeParse(await req.json().catch(() => ({})))
-  if (!parsed.success) return NextResponse.json({ ok: false, error: '입력 오류' }, { status: 400 })
-  const family = await getFamilyByNickname(parsed.data.nickname)
-  if (!family) return NextResponse.json({ ok: false, error: '가족 없음' }, { status: 404 })
-  family.pushedHints.push(parsed.data.hint)
-  await saveFamily(family)
-  return NextResponse.json({ ok: true })
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: '힌트 본문이 비어있습니다' }, { status: 400 })
+  }
+
+  const families = await listAllFamilies()
+  await Promise.all(
+    families.map(f => {
+      f.pushedHints.push(parsed.data.hint)
+      return saveFamily(f)
+    }),
+  )
+
+  return NextResponse.json({ ok: true, deliveredTo: families.length })
 }

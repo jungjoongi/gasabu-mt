@@ -53,9 +53,7 @@ export default function AdminPage() {
         </button>
       </div>
       <PushHintForm
-        onSubmit={(nickname, hint) =>
-          call('/api/admin/push-hint', { nickname, hint })
-        }
+        onSubmit={(hint) => call('/api/admin/push-hint', { hint })}
       />
       <pre className="bg-stone-900 text-xs rounded-lg p-3 max-h-64 overflow-auto whitespace-pre-wrap">
         {log.join('\n')}
@@ -64,34 +62,25 @@ export default function AdminPage() {
   )
 }
 
-function PushHintForm({
-  onSubmit,
-}: {
-  onSubmit: (nickname: string, hint: string) => void
-}) {
-  const [n, setN] = useState('')
+function PushHintForm({ onSubmit }: { onSubmit: (hint: string) => void }) {
   const [h, setH] = useState('')
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        onSubmit(n, h)
+        if (!h.trim()) return
+        onSubmit(h.trim())
         setH('')
       }}
       className="flex flex-col gap-2 border border-amber-700/40 rounded-lg p-3"
     >
-      <h3 className="text-sm font-bold">힌트 푸시</h3>
-      <input
-        value={n}
-        onChange={(e) => setN(e.target.value)}
-        placeholder="가족 닉네임"
-        className="px-2 py-1 rounded bg-amber-50 text-amber-950"
-      />
-      <input
+      <h3 className="text-sm font-bold">📨 모든 가족에게 힌트 방송</h3>
+      <textarea
         value={h}
         onChange={(e) => setH(e.target.value)}
-        placeholder="힌트 본문"
-        className="px-2 py-1 rounded bg-amber-50 text-amber-950"
+        placeholder="힌트 본문 (모든 가족에게 동시 전달)"
+        rows={3}
+        className="px-2 py-1 rounded bg-amber-50 text-amber-950 resize-none"
       />
       <button
         type="submit"
