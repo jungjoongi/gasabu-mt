@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AudioPlayer } from '@/components/AudioPlayer'
+import { PrologueExperience } from '@/components/PrologueExperience'
 
 export default function Splash() {
   return (
@@ -15,11 +15,7 @@ export default function Splash() {
       </p>
 
       <div className="w-full max-w-sm flex flex-col gap-3">
-        <AudioPlayer
-          src="/audio/prologue.mp3"
-          label="🎙️ 프롤로그 듣기"
-          prominent
-        />
+        <PrologueExperience />
         <Link
           href="/register"
           className="block text-center px-8 py-4 bg-amber-300 text-amber-950 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition"
