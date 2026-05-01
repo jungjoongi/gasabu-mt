@@ -41,9 +41,10 @@ describe('POST /api/family/register', () => {
     expect(a.data.id).toBe(b.data.id)
   })
 
-  it('9번째 가족 → 409', async () => {
-    for (let i = 0; i < 8; i++) await POST(req({ nickname: `f${i}` }))
-    const res = await POST(req({ nickname: 'f9' }))
-    expect(res.status).toBe(409)
+  it('가족 수 제한 없음 — 12번째 등록도 200', async () => {
+    for (let i = 0; i < 12; i++) {
+      const res = await POST(req({ nickname: `f${i}` }))
+      expect(res.status).toBe(200)
+    }
   })
 })

@@ -6,12 +6,11 @@ import type { Family } from '@/types'
 const FAMILY_KEY = (id: string) => `family:${id}`
 const NICK_KEY = (nick: string) => `nickname-index:${nick}`
 const FAMILIES_LIST = 'families:list'
-const MAX_FAMILIES = 8
 
 /**
  * 닉네임 기반 가족 등록.
  *  - 동일 닉네임이 이미 있으면 기존 Family 그대로 반환 (멱등).
- *  - 8가족 슬롯이 모두 차면 throw (Error: "이미 8가족이 등록되었습니다").
+ *  - 가족 수 제한 없음 (9번째 이상은 닉네임 해시 기반 색 자동 생성).
  *  - 신규 등록 시 미사용 가문 색을 자동 배정.
  */
 export async function registerFamily(nickname: string): Promise<Family> {
@@ -25,13 +24,8 @@ export async function registerFamily(nickname: string): Promise<Family> {
   }
 
   const all = await listAllFamilies()
-  if (all.length >= MAX_FAMILIES) {
-    throw new Error('이미 8가족이 등록되었습니다')
-  }
-
   const usedColors = all.map((f) => f.color)
-  const color = pickUnusedColor(usedColors)
-  if (!color) throw new Error('사용 가능한 색상이 없습니다')
+  const color = pickUnusedColor(usedColors, trimmed)
 
   const fam: Family = {
     id: uuidv4(),

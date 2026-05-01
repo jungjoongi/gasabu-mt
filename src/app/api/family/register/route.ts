@@ -20,7 +20,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, data: family })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : '등록 실패'
-    const status = /8가족/.test(msg) ? 409 : 400
-    return NextResponse.json({ ok: false, error: msg }, { status })
+    return NextResponse.json({ ok: false, error: msg }, { status: 400 })
   }
 }

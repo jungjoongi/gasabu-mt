@@ -11,7 +11,17 @@ export const FAMILY_COLORS = [
 
 export type FamilyColor = (typeof FAMILY_COLORS)[number]
 
-export function pickUnusedColor(used: string[]): string | null {
+// 안정적인 닉네임 → HSL 해시. 추가 가족용 색 자동 생성.
+function hashColor(seed: string): string {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0
+  const hue = h % 360
+  return `hsl(${hue}, 65%, 45%)`
+}
+
+export function pickUnusedColor(used: string[], seed?: string): string {
   const remaining = FAMILY_COLORS.filter((c) => !used.includes(c.hex))
-  return remaining[0]?.hex ?? null
+  if (remaining[0]) return remaining[0].hex
+  // 9번째 이상 가족은 닉네임 해시 기반 색
+  return hashColor(seed ?? Math.random().toString(36))
 }

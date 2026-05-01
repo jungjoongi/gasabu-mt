@@ -10,7 +10,7 @@ describe('family', () => {
     const f = await registerFamily('김씨네')
     expect(f.id).toBeTruthy()
     expect(f.nickname).toBe('김씨네')
-    expect(f.color).toMatch(/^#[0-9a-f]{6}$/i)
+    expect(f.color).toMatch(/^(#[0-9a-f]{6}|hsl\(.+\))$/i)
     expect(f.treasuresFound).toEqual([])
     expect(f.initialsRevealed).toEqual([])
     expect(f.attemptsUsed).toBe(0)
@@ -23,12 +23,13 @@ describe('family', () => {
     expect(a.color).toBe(b.color)
   })
 
-  it('8가족까지만 등록 가능', async () => {
-    for (let i = 0; i < 8; i++) await registerFamily(`가족${i}`)
-    await expect(registerFamily('가족9')).rejects.toThrow(/8가족/)
+  it('가족 수 제한 없음 — 9번째 이상도 자유롭게 등록', async () => {
+    for (let i = 0; i < 12; i++) await registerFamily(`가족${i}`)
+    const all = await listAllFamilies()
+    expect(all.length).toBe(12)
   })
 
-  it('등록한 가족은 색상이 모두 다름', async () => {
+  it('처음 8가족은 미리 정의된 색상 모두 다르게', async () => {
     const colors = new Set<string>()
     for (let i = 0; i < 8; i++) {
       const f = await registerFamily(`가족${i}`)
